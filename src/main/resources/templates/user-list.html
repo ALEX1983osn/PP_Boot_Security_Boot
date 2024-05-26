@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>Users</title>
+</head>
+<body>
+
+<div class="container">
+    <div style="text-align: center;">
+        <h1>Hi</h1>
+    </div>
+
+
+    <h2>Users list</h2>
+
+    <table th:border="10">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Roles</th>
+            <th>Edit</th>
+            <th>Delete</th>
+            <th>UserDetails</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user: ${users}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.username}"></td>
+            <td th:text="${user.password}"></td>
+            <td>
+                <span th:each="role: ${user.roles}" th:text="${role.name} + ', '"></span>
+            </td>
+            <td>
+                <form th:action="@{/admin/user-update}" th:method="get">
+                    <input type="hidden" name="id" th:value="${user.getId()}">
+                    <button type="submit">Edit</button>
+                </form>
+            </td>
+            <td>
+                <form th:action="@{/admin/user-delete}" th:method="post">
+                    <input type="hidden" name="id" th:value="${user.getId()}" />
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+            <td>
+                <form th:action="@{/user}" th:method="get">
+                    <input type="hidden" name="id" th:value="${user.getId()}">
+                    <button type="submit">Details</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <br/>
+    <a href="/admin/add">Add user</a>
+    <br/>
+    <form th:action="@{/logout}" th:method="post">
+        <input type="submit" value="Logout"/>
+    </form>
+
+</div>
+
+</body>
+</html>

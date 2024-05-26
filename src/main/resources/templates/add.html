@@ -1,0 +1,72 @@
+<!-- add.html -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>Add new user</title>
+    <style>table th, table td {
+        padding: 15px;
+    }</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <center>
+        <h1>Hi</h1>
+    </center>
+
+    <h2>Add User</h2>
+
+    <form th:action="@{/admin/add}" th:object="${user}" method="post" onsubmit="return validateRoles()">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" th:field="*{username}" required>
+        <div style="color:red" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username error</div>
+        <br/>
+        <br/>
+        <label for="password">Password:</label>
+        <input type="text" id="password" name="password" th:field="*{password}" required>
+        <div style="color:red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password error</div>
+        <br/>
+        <br/>
+        <label for="email">Email</label>
+        <input type="text" id="email" name="email" th:field="*{email}" required>
+        <div style="color:red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email error</div>
+        <br/>
+        <br/>
+        <div class="mb-3">
+            <label>Roles:</label>
+            <div th:each="role : ${allRoles}">
+                <input type="checkbox" th:id="${'role_' + role.id}"
+                       th:value="${role.id}" th:field="*{roles}"
+                />
+                <label th:for="${'role_' + role.id}" th:text="${role.name}"></label>
+            </div>
+        </div>
+        <br/>
+        <br/>
+        <button type="submit">Save</button>
+    </form>
+    <script th:inline="javascript">
+        function validateRoles() {
+            if ($('input[name="roles"]:checked').length === 0) {
+                alert('Please select at least one role');
+                return false;
+            }
+            return true;
+        }
+    </script>
+    <br>
+    <br>
+    <a href="/admin">Back to List</a>
+    <form th:action="@{/logout}" th:method="post">
+        <input type="submit" value="Logout"/>
+    </form>
+
+</div>
+
+</body>
+</html>
