@@ -2,22 +2,20 @@ package ru.kata.spring.boot_security.demo.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.models.Role;
-import ru.kata.spring.boot_security.demo.models.User;
+import ru.kata.spring.boot_security.demo.entities.Role;
+import ru.kata.spring.boot_security.demo.entities.User;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.repositories.UserRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service
 @Transactional
-public class UserServiceImpl implements UserDetailsService, UserService {
+public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -30,23 +28,13 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
-
-        if (user == null) {
-            throw new UsernameNotFoundException("User " + username + " not found");
-        }
-        return user;
-    }
-
-    @Override
     public List<User> getAll() {
         return userRepository.findAll();
     }
 
     @Override
     public boolean add(User user) {
-        User userFromDB = userRepository.findByUsername(user.getUsername());
+        User userFromDB = userRepository.findByEmail(user.getEmail());
 
         if (userFromDB != null) {
             return false;
@@ -68,33 +56,34 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public boolean update(User updatedUser, List<Role> roles) {
-        User userFromDB = userRepository.findByUsername(updatedUser.getUsername());
-        if (userFromDB != null) {
-            userFromDB.setUsername(updatedUser.getUsername());
-            userFromDB.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-            userFromDB.setEmail(updatedUser.getEmail());
-            userFromDB.setRoles(roles);
-            userRepository.save(userFromDB);
-            return true;
+    public void update(User updatedUser) {
+        User user = readUser(updatedUser.getId());
+        String newPassword = updatedUser.getPassword();
+
+        if (!newPassword.equals(user.getPassword()) && !newPassword.isEmpty()) {
+            updatedUser.setPassword(passwordEncoder.encode(newPassword));
         } else {
-            return false;
+            updatedUser.setPassword(user.getPassword());
         }
+
+        userRepository.save(updatedUser);
     }
 
     @Override
-    public User findUser(long id) {
+    public User readUser(long id) {
         return userRepository.findById(id).orElseThrow(() ->
-                new UsernameNotFoundException("User with id = " + id + " not exist"));
+                new EntityNotFoundException("User with id = " + id + " not exist"));
     }
 
     @Override
     public void delete(long id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException("Such user not exists"));
+        userRepository.delete(user);
     }
 
     @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }

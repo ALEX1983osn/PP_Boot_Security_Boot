@@ -1,22 +1,24 @@
 package ru.kata.spring.boot_security.demo.services;
 
-import ru.kata.spring.boot_security.demo.models.Role;
-import ru.kata.spring.boot_security.demo.models.User;
 
+
+import ru.kata.spring.boot_security.demo.entities.User;
+
+import javax.validation.Valid;
 import java.util.List;
 
 public interface UserService {
     List<User> getAll();
 
-    boolean add(User user);
+    boolean add(@Valid User user);
 
-    boolean update(User updatedUser, List<Role> roles);
+    void update(User updatedUser);
 
-    User findUser(long id);
+    User readUser(long id);
 
     void delete(long id);
 
-    User findByUsername(String username);
+    User findByEmail(String email);
 
     void createRolesIfNotExist();
 }
